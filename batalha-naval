@@ -1,0 +1,300 @@
+programa
+{
+    inclua biblioteca Util
+    inclua biblioteca Texto
+    inclua biblioteca Tipos
+    
+    // Declaração das matrizes do jogador e do computador
+    inteiro matriz_jogador[10][10]
+    inteiro matriz_computador[10][10]
+    logico jogo_ativo
+    inteiro tiros_jogador, tiros_computador
+
+    // Função para inicializar a matriz com zeros
+    funcao inicializar_matriz(inteiro matriz[][])
+    {
+        inteiro i, j
+        para (i = 0; i < 10; i++)
+        {
+            para (j = 0; j < 10; j++)
+            {
+                matriz[i][j] = 0
+            }
+        }
+    }
+
+    // Função para posicionar os barcos do jogador
+    funcao posicionar_barcos_jogador(inteiro matriz[][])
+    {
+        inteiro i, x, y, tamanho
+        cadeia direcao
+        
+        // 5 barcos com tamanhos variados (2, 3, 3, 4, 5)
+        inteiro tamanhos[5] = {2, 3, 3}
+        
+        para (i = 0; i < 3; i++)
+        {
+            escreva("Posicione o barco de tamanho ", tamanhos[i], ":\n")
+            
+            x = obter_entrada_valida("Informe a coordenada X inicial (0-9): ")
+            y = obter_entrada_valida("Informe a coordenada Y inicial (0-9): ")
+            escreva("Informe a direção (H para horizontal, V para vertical): ")
+            leia(direcao)
+            
+            se (direcao == "H")
+            {
+                se (x + tamanhos[i] - 1 < 10)
+                {
+                    para (inteiro j = 0; j < tamanhos[i]; j++)
+                    {
+                        matriz[x + j][y] = 1
+                    }
+                }
+                senao
+                {
+                    escreva("Posição inválida! Tente novamente.\n")
+                    i--
+                }
+            }
+            senao se (direcao == "V")
+            {
+                se (y + tamanhos[i] - 1 < 10)
+                {
+                    para (inteiro j = 0; j < tamanhos[i]; j++)
+                    {
+                        matriz[x][y + j] = 1
+                    }
+                }
+                senao
+                {
+                    escreva("Posição inválida! Tente novamente.\n")
+                    i--
+                }
+            }
+            senao
+            {
+                escreva("Direção inválida! Tente novamente.\n")
+                i--
+            }
+        }
+    }
+
+    // Função para posicionar os barcos do computador
+    funcao posicionar_barcos_computador(inteiro matriz[][])
+    {
+        inteiro i, posx, posy, direcao, tamanho
+        logico posicao_valida
+
+        tamanho = 3 // Tamanho fixo dos barcos do computador
+
+        para (i = 0; i < 5; i++) // Posicionar 5 barcos de tamanho 3
+        {
+            posicao_valida = falso
+            enquanto (posicao_valida == falso)
+            {
+                posx = Util.sorteia(0, 9)
+                posy = Util.sorteia(0, 9)
+                direcao = Util.sorteia(0, 1) // 0 para horizontal, 1 para vertical
+
+                se (direcao == 0) // Horizontal
+                {
+                    se (posx + tamanho - 1 < 10)
+                    {
+                        posicao_valida = verdadeiro
+                        para (inteiro j = 0; j < tamanho; j++)
+                        {
+                            se (matriz[posx + j][posy] == 1)
+                            {
+                                posicao_valida = falso
+                            }
+                        }
+                        se (posicao_valida == verdadeiro)
+                        {
+                            para (inteiro j = 0; j < tamanho; j++)
+                            {
+                                matriz[posx + j][posy] = 1
+                            }
+                        }
+                    }
+                }
+                senao // Vertical
+                {
+                    se (posy + tamanho - 1 < 10)
+                    {
+                        posicao_valida = verdadeiro
+                        para (inteiro j = 0; j < tamanho; j++)
+                        {
+                            se (matriz[posx][posy + j] == 1)
+                            {
+                                posicao_valida = falso
+                            }
+                        }
+                        se (posicao_valida == verdadeiro)
+                        {
+                            para (inteiro j = 0; j < tamanho; j++)
+                            {
+                                matriz[posx][posy + j] = 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Função para exibir o tabuleiro
+    funcao exibir_tabuleiro(inteiro matriz[][])
+    {
+        para (inteiro i = 0; i < 10; i++)
+        {
+            para (inteiro j = 0; j < 10; j++)
+            {
+                escreva(matriz[i][j], " ")
+            }
+            escreva("\n")
+        }
+    }
+
+    // Função para verificar se houve um acerto ou erro
+    funcao logico verificar_tiro(inteiro matriz[][], inteiro x, inteiro y) 
+    {
+        se (matriz[x][y] == 1)
+        {
+            matriz[x][y] = 2 // Marcar como atingido
+            retorne verdadeiro
+        }
+        senao
+        {
+            matriz[x][y] = 3 // Marcar como tiro na água
+            retorne falso
+        }
+    }
+
+    // Função para realizar um tiro do computador
+    funcao tiro_computador(inteiro matriz[][])
+    {
+        inteiro posX = 0, posY = 0
+        logico tiro_valido
+        tiro_valido = falso
+
+        enquanto (tiro_valido == falso)
+        {
+            posX = Util.sorteia(0, 9)
+            posY = Util.sorteia(0, 9)
+            se (matriz[posX][posY] == 0 ou matriz[posX][posY] == 1)
+            {
+                tiro_valido = verdadeiro
+            }
+        }
+        se (verificar_tiro(matriz, posX, posY))
+        {
+            escreva("Computador acertou um barco em (", posX, ", ", posY, ")!\n")
+        }
+        senao
+        {
+            escreva("Computador atirou na água em (", posX, ", ", posY, ").\n")
+        }
+    }
+
+    // Função para verificar se todos os barcos foram afundados
+    funcao logico verificar_fim_do_jogo(inteiro matriz[][])
+    {
+        para (inteiro i = 0; i < 10; i++)
+        {
+            para (inteiro j = 0; j < 10; j++)
+            {
+                se (matriz[i][j] == 1)
+                {
+                    retorne falso
+                }
+            }
+        }
+        retorne verdadeiro
+    }
+
+    // Função para obter entrada válida do usuário
+    funcao inteiro obter_entrada_valida(cadeia mensagem)
+    {
+        inteiro entrada
+        logico entrada_valida
+
+        entrada_valida = falso
+        enquanto (entrada_valida == falso)
+        {
+            escreva(mensagem)
+            leia(entrada)
+            se (entrada >= 0 e entrada <= 9)
+            {
+                entrada_valida = verdadeiro
+            }
+            senao
+            {
+                escreva("Valor fora do intervalo! Tente novamente.\n")
+            }
+        }
+        retorne entrada
+    }
+
+    // Função principal
+    funcao inicio()
+    {
+        inicializar_matriz(matriz_jogador)
+        inicializar_matriz(matriz_computador)
+        
+        escreva("Posicione seus barcos no tabuleiro:\n")
+        posicionar_barcos_jogador(matriz_jogador)
+        
+        posicionar_barcos_computador(matriz_computador)
+
+        limpa()
+        
+        // Inicializa o estado do jogo
+        jogo_ativo = verdadeiro
+        tiros_jogador = 0
+        tiros_computador = 0
+
+        enquanto (jogo_ativo)
+        {
+            inteiro x, y
+            x = obter_entrada_valida("Seu turno! Informe a coordenada X para atirar (0-9): ")
+            y = obter_entrada_valida("Informe a coordenada Y para atirar (0-9): ")
+
+            se (verificar_tiro(matriz_computador, x, y))
+            {
+                escreva("Você acertou um barco em (", x, ", ", y, ")!\n")
+            }
+            senao
+            {
+                escreva("Você atirou na água em (", x, ", ", y, ").\n")
+            }
+            tiros_jogador++
+
+            // Verifica se o jogo terminou
+            se (verificar_fim_do_jogo(matriz_computador))
+            {
+                escreva("Parabéns! Você afundou todos os barcos do computador!\n")
+                jogo_ativo = falso
+            }
+
+            // Turno do computador
+            tiro_computador(matriz_jogador)
+            tiros_computador++
+
+            // Verifica se o jogo terminou
+            se (verificar_fim_do_jogo(matriz_jogador))
+            {
+                escreva("O computador afundou todos os seus barcos! Você perdeu!\n")
+                jogo_ativo = falso
+            }
+
+            // Exibe os tabuleiros
+            escreva("Tabuleiro do jogador:\n")
+            exibir_tabuleiro(matriz_jogador)
+            escreva("Tabuleiro do computador:\n")
+            exibir_tabuleiro(matriz_computador)
+        }
+
+        limpa()
+        escreva("Fim de jogo! Você realizou ", tiros_jogador, " tiros. O computador realizou ", tiros_computador, " tiros.\n")
+    }
+}
